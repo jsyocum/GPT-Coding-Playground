@@ -214,7 +214,7 @@ while running:
         character_rect.top = 0
 
     ## Else-if `character_rect.bottom` > screen height then set it to screen height
-    elif character_rect.bottom > screen.get_height():
+    elif character_rect.bottom >= screen.get_height() - (screen.get_height() / 10):
 
         ### Set it to screen height
         ### This will make the ground level for wall climbing logic later on.

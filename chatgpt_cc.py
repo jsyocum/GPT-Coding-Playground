@@ -30,24 +30,35 @@ window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 
 # load player sprites
-player_sprites = [
-    # pygame.image.load('player_idle.png'),
-    # pygame.image.load('player_walk1.png'),
-    # pygame.image.load('player_walk2.png'),
-    # pygame.image.load('player_jump.png'),
-    # pygame.image.load('player_dash.png'),
-    # pygame.image.load('player_climb.png'),
-    pygame.image.load('character.png'),
-    pygame.image.load('character.png'),
-    pygame.image.load('character.png'),
-    pygame.image.load('character.png'),
-    pygame.image.load('character.png'),
-    pygame.image.load('character.png'),
+player_sprite_paths = [
+    # "player_idle.png",
+    # "player_walk1.png",
+    # "player_walk2.png",
+    # "player_jump.png",
+    # "player_dash.png",
+    # "player_wall_climb.png"
+    "character.png",
+    "character.png",
+    "character.png",
+    "character.png",
+    "character.png",
+    "character.png"
 ]
+player_sprites = []
+for sprite_path in player_sprite_paths:
+    sprite = pygame.image.load(sprite_path).convert_alpha()
+    original_width, original_height = sprite.get_size()
+    aspect_ratio = original_width / original_height
+    scale = 10
+    new_width = int(WINDOW_HEIGHT / scale * aspect_ratio)
+    new_height = int(WINDOW_HEIGHT / scale)
+    sprite = pygame.transform.scale(sprite, (new_width, new_height))
+    player_sprites.append(sprite)
 
 # set up player
-player_rect = pygame.Rect(
-    WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, PLAYER_WIDTH, PLAYER_HEIGHT)
+# player_rect = pygame.Rect(
+#     WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, PLAYER_WIDTH, PLAYER_HEIGHT)
+player_rect = player_sprites[0].get_rect()
 player_x_velocity = 0
 player_y_velocity = 0
 player_on_ground = False
