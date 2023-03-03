@@ -16,42 +16,79 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def cubic_bezier_curve_through_three_points(P0, P3, V, n=100):
-    # find a point on a quadratic bezier curve that has t = 0.5
-    Q = (P0 + 2 * V + P3) / 4
+def find_vertex_point(start_point, end_point, height):
+    height += start_point[2]
 
-    # find two control points that are equidistant from V and lie on QV line
-    p11 = Q + (Q - V)
-    p22 = Q - (Q - V)
+    # find the midpoint between start and end points
+    midpoint = (start_point + end_point) / 2.0
 
-    # create an array of parameter values
-    t = np.linspace(0, 1, n)
+    # calculate the vector from start to end
+    line_vec = end_point - start_point
 
-    # add a new axis to t so it has shape (n, 1)
-    t = t[:, np.newaxis]
+    # calculate the perpendicular vector
+    perp_vec = np.array([line_vec[1], -line_vec[0], 0.0], dtype=float)
 
-    # compute the curve using vectorized operations
-    B = (1 - t)**3 * P0 + 3 * (1 - t)**2 * t * p11 + \
-        3 * (1 - t) * t**2 * p22 + t**3 * P3
+    # normalize the perpendicular vector
+    perp_vec /= np.linalg.norm(perp_vec)
 
-    return B
+    # calculate the vertex point
+    vertex_point = midpoint + height * perp_vec
+
+    # rotate the vertex_point
+    vertex_point = rotate_curve_points(vertex_point, start_point, end_point, 90)
+
+    return vertex_point
+
+
+def bezier_curve(start_point, vertex_point, end_point, n):
+    # Calculate the control point
+    control_point = 2 * vertex_point - 0.5 * (start_point + end_point)
+
+    # Calculate the curve points
+    t = np.linspace(0, 1, n).reshape((1, n))
+    B = (1 - t) ** 2 * start_point.reshape((3, 1)) + 2 * (1 - t) * t * control_point.reshape((3, 1)) + t ** 2 * end_point.reshape((3, 1))
+    curve_points = B.T
+
+    return curve_points
+
+
+def rotate_curve_points(curve_points, start_point, end_point, angle_degrees):
+    # calculate axis vector
+    axis_vec = end_point - start_point
+    axis_norm = np.linalg.norm(axis_vec)
+    if axis_norm == 0:
+        raise ValueError("start and end points are the same")
+    axis_unit = axis_vec / axis_norm
+
+    # create rotation matrix around axis
+    angle_radians = np.radians(angle_degrees)
+    cos_theta = np.cos(angle_radians)
+    sin_theta = np.sin(angle_radians)
+    rot_matrix = np.array([[cos_theta + axis_unit[0]**2*(1-cos_theta),
+                            axis_unit[0]*axis_unit[1]*(1-cos_theta) - axis_unit[2]*sin_theta,
+                            axis_unit[0]*axis_unit[2]*(1-cos_theta) + axis_unit[1]*sin_theta],
+                           [axis_unit[1]*axis_unit[0]*(1-cos_theta) + axis_unit[2]*sin_theta,
+                            cos_theta + axis_unit[1]**2*(1-cos_theta),
+                            axis_unit[1]*axis_unit[2]*(1-cos_theta) - axis_unit[0]*sin_theta],
+                           [axis_unit[2]*axis_unit[0]*(1-cos_theta) - axis_unit[1]*sin_theta,
+                            axis_unit[2]*axis_unit[1]*(1-cos_theta) + axis_unit[0]*sin_theta,
+                            cos_theta + axis_unit[2]**2*(1-cos_theta)]])
+
+    # rotate curve points
+    rotated_points = np.dot(curve_points - start_point, rot_matrix) + start_point
+
+    return rotated_points
 
 
 def calculate_curve_points(start_point, end_point, H, num_points=100):
-    # Calculate vector from start to end point
-    start_to_end = end_point - start_point
-
-    # Calculate the length of the start to end vector
-    # start_to_end_length = np.linalg.norm(start_to_end)
-
-    # Calculate the location along the start to end vector where the vertex should be located
-    vertex_loc = start_to_end / 2
-
-    # Raise the vertex location to the height of H
-    vertex_point = np.array([vertex_loc[0], vertex_loc[1], H])
+    # Calculate vertex point
+    vertex_point = find_vertex_point(start_point, end_point, H)
 
     # Calculate curve points
-    curve_points = cubic_bezier_curve_through_three_points(start_point, end_point, vertex_point)
+    curve_points = bezier_curve(start_point, vertex_point, end_point, num_points)
+
+    # Rotate curve points
+    # curve_points = rotate_curve_points(curve_points, start_point, end_point, 90)
 
     return curve_points, vertex_point
 
