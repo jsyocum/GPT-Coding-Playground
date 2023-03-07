@@ -55,7 +55,7 @@ def display_fonts(font_examples):
     print("Some available fonts:")
     for i, font in enumerate(font_examples):
         print(f"{i+1}: {font}")
-        print(pyfiglet.figlet_format(example_phrase, font=font))
+        print(pyfiglet.figlet_format(example_phrase, font=font, width=9999999999999999))
         print("\n")
 
 # A function to prompt the user to select a font
@@ -89,7 +89,7 @@ def cycle_fonts():
     while True:
         font = font_list[index]
         print(f"Font: {font}")
-        print(pyfiglet.figlet_format(example_phrase, font=font))
+        print(pyfiglet.figlet_format(example_phrase, font=font, width=9999999999999999))
         response = get_letter_input("Enter 'n' for next font, 'p' for previous font, 's' to skip to a specific letter, or 'q' to quit cycling: ")
         if response == "n":
             index = (index + 1) % len(font_list)
@@ -209,7 +209,7 @@ while True:
         font_used = f"Font being used: {font}\n"
         text_printed = f"Text being printed: {text}\n\n"
         result = font_used + text_printed
-        result += pyfiglet.figlet_format(text, font=font)
+        result += pyfiglet.figlet_format(text, font=font, width=9999999999999999)
 
         # Print the result
         print(result)
